@@ -3,6 +3,7 @@ package com.emc.employee.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,7 +13,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @EnableWebSecurity
@@ -29,10 +30,14 @@ public class EmcSecurityConfig extends WebSecurityConfigurerAdapter {
   public static final GrantedAuthority IC = new SimpleGrantedAuthority(INDIVIDUAL_CONTRIBUTOR_ROLE);
 
   public EmcSecurityConfig() {
-    users.add(new User("daniellek", "daniellek", Arrays.asList(new GrantedAuthority[]{ADMIN})));
-    users.add(new User("johna", "johna", Arrays.asList(new GrantedAuthority[]{IC})));
-    users.add(new User("kellyj", "kellyj", Arrays.asList(new GrantedAuthority[]{IC, MANAGER})));
-    users.add(new User("tomh", "tomh", Arrays.asList(new GrantedAuthority[]{IC})));
+    BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+    users.add(new User("daniellek", encoder.encode("daniellek"),
+        Arrays.asList(new GrantedAuthority[]{ADMIN})));
+    users
+        .add(new User("johna", encoder.encode("johna"), Arrays.asList(new GrantedAuthority[]{IC})));
+    users.add(new User("kellyj", encoder.encode("kellyj"),
+        Arrays.asList(new GrantedAuthority[]{IC, MANAGER})));
+    users.add(new User("tomh", encoder.encode("tomh"), Arrays.asList(new GrantedAuthority[]{IC})));
   }
 
   @Override
@@ -48,6 +53,11 @@ public class EmcSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
     auth.userDetailsService(new InMemoryUserDetailsManager(users))
-        .passwordEncoder(NoOpPasswordEncoder.getInstance());
+        .passwordEncoder(getPasswordEncoder());
+  }
+
+  @Bean
+  public BCryptPasswordEncoder getPasswordEncoder() {
+    return new BCryptPasswordEncoder();
   }
 }

@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public class EmcApplication {
 
 	public static void main(String[] args) {
-	  SpringApplication.run(EmcApplication.class, args);
+		SpringApplication.run(EmcApplication.class, args);
 	}
 }

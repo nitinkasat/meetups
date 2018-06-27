@@ -36,7 +36,7 @@ public class EmployeeController {
   }
 
   @PostMapping
-  @PreAuthorize(value = "hasAuthority('Admin')")
+  @PreAuthorize(value = "hasAnyAuthority('Admin','Mgr')")
   public @ResponseBody
   Employee addEmployee(@RequestBody Employee employee) {
     return employeeService

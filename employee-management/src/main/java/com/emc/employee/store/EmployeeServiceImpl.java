@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
@@ -21,20 +22,23 @@ public class EmployeeServiceImpl implements EmployeeService {
 
   public static final Random RANDOM = new Random();
   private final InMemoryUserDetailsManager userDetailsManager;
+  private final BCryptPasswordEncoder encoder;
   private List<Employee> employees = new ArrayList<>();
 
   private AtomicInteger id = new AtomicInteger(1);
 
   @Autowired
-  public EmployeeServiceImpl(InMemoryUserDetailsManager userDetailsManager) {
+  public EmployeeServiceImpl(InMemoryUserDetailsManager userDetailsManager,
+      BCryptPasswordEncoder encoder) {
     employees.add(new Employee(null, "Danielle", "Kody", id.getAndIncrement(), "daniellek"));
     int reportsToDanielle = id.get();
     employees
         .add(new Employee(reportsToDanielle, "John", "Anderson", id.getAndIncrement(), "johna"));
     employees
         .add(new Employee(reportsToDanielle, "Kelly", "Jackson", id.getAndIncrement(), "kellyj"));
-    employees.add(new Employee(null, "Steve", "Smith", id.getAndIncrement(), "steves"));
+    employees.add(new Employee(null, "Tom", "Henson", id.getAndIncrement(), "tomh"));
     this.userDetailsManager = userDetailsManager;
+    this.encoder = encoder;
   }
 
   @Override
@@ -48,13 +52,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     String userName = firstName.toLowerCase().concat(("" + lastName.charAt(0)).toLowerCase());
     Employee employee = new Employee(reportsTo, firstName, lastName, id.getAndIncrement(),
         userName);
-    employees.add(employee);
     if (userDetailsManager.userExists(userName)) {
       userName = userName + RANDOM.nextInt();
     }
-    userDetailsManager
-        .createUser(new User(userName, userName, Arrays.asList(EmcSecurityConfig.IC)));
+    User user = new User(userName, encoder.encode(userName), Arrays.asList(EmcSecurityConfig.IC));
+    userDetailsManager.createUser(user);
     employee.setUserName(userName);
+    employees.add(employee);
     return employee;
   }
 
