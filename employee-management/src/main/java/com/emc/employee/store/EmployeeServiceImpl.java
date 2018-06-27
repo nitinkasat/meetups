@@ -24,11 +24,10 @@ public class EmployeeServiceImpl implements EmployeeService {
   private final InMemoryUserDetailsManager userDetailsManager;
   private final BCryptPasswordEncoder encoder;
   private List<Employee> employees = new ArrayList<>();
-
   private AtomicInteger id = new AtomicInteger(1);
 
   @Autowired
-  public EmployeeServiceImpl(InMemoryUserDetailsManager userDetailsManager,
+  public EmployeeServiceImpl(EmcSecurityConfig emcSecurityConfig,
       BCryptPasswordEncoder encoder) {
     employees.add(new Employee(null, "Danielle", "Kody", id.getAndIncrement(), "daniellek"));
     int reportsToDanielle = id.get();
@@ -37,7 +36,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     employees
         .add(new Employee(reportsToDanielle, "Kelly", "Jackson", id.getAndIncrement(), "kellyj"));
     employees.add(new Employee(null, "Tom", "Henson", id.getAndIncrement(), "tomh"));
-    this.userDetailsManager = userDetailsManager;
+    this.userDetailsManager = emcSecurityConfig.getUserDetailsManager();
     this.encoder = encoder;
   }
 

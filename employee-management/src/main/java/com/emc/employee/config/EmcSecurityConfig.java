@@ -3,6 +3,7 @@ package com.emc.employee.config;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import lombok.Getter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -28,6 +29,8 @@ public class EmcSecurityConfig extends WebSecurityConfigurerAdapter {
   public static final GrantedAuthority ADMIN = new SimpleGrantedAuthority(ADMIN_ROLE);
   public static final GrantedAuthority MANAGER = new SimpleGrantedAuthority(MGR_ROLE);
   public static final GrantedAuthority IC = new SimpleGrantedAuthority(INDIVIDUAL_CONTRIBUTOR_ROLE);
+  @Getter
+  private InMemoryUserDetailsManager userDetailsManager=new InMemoryUserDetailsManager();
 
   public EmcSecurityConfig() {
     BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -52,8 +55,8 @@ public class EmcSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(new InMemoryUserDetailsManager(users))
-        .passwordEncoder(getPasswordEncoder());
+    users.forEach(userDetails -> userDetailsManager.createUser(userDetails));
+    auth.userDetailsService(userDetailsManager).passwordEncoder(getPasswordEncoder());
   }
 
   @Bean
