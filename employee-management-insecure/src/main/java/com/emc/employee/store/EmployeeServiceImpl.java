@@ -1,24 +1,40 @@
 package com.emc.employee.store;
 
+import com.emc.employee.config.EmcSecurityConfig;
 import com.emc.employee.model.Employee;
+import com.emc.employee.security.PostAuthorizeDirectReports;
+import com.emc.employee.security.PreAuthorizeDirectReports;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
+  public static final Random RANDOM = new Random();
+  private final InMemoryUserDetailsManager userDetailsManager;
   private List<Employee> employees = new ArrayList<>();
 
   private AtomicInteger id = new AtomicInteger(1);
 
-  public EmployeeServiceImpl() {
-    employees.add(new Employee(null, "Danielle", "Kody", id.getAndIncrement()));
+  @Autowired
+  public EmployeeServiceImpl(InMemoryUserDetailsManager userDetailsManager) {
+    employees.add(new Employee(null, "Danielle", "Kody", id.getAndIncrement(), "daniellek"));
     int reportsToDanielle = id.get();
-    employees.add(new Employee(reportsToDanielle, "John", "Anderson", id.getAndIncrement()));
-    employees.add(new Employee(reportsToDanielle, "Kelly", "Jackson", id.getAndIncrement()));
-    employees.add(new Employee(null, "Steve", "Smith", id.getAndIncrement()));
+    employees
+        .add(new Employee(reportsToDanielle, "John", "Anderson", id.getAndIncrement(), "johna"));
+    employees
+        .add(new Employee(reportsToDanielle, "Kelly", "Jackson", id.getAndIncrement(), "kellyj"));
+    employees.add(new Employee(null, "Steve", "Smith", id.getAndIncrement(), "steves"));
+    this.userDetailsManager = userDetailsManager;
   }
 
   @Override
@@ -27,25 +43,42 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
 
   @Override
+  @PostAuthorizeDirectReports
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo) {
-    Employee employee = new Employee(reportsTo, firstName, lastName, id.getAndIncrement());
+    String userName = firstName.toLowerCase().concat(("" + lastName.charAt(0)).toLowerCase());
+    Employee employee = new Employee(reportsTo, firstName, lastName, id.getAndIncrement(),
+        userName);
     employees.add(employee);
+    if (userDetailsManager.userExists(userName)) {
+      userName = userName + RANDOM.nextInt();
+    }
+    userDetailsManager
+        .createUser(new User(userName, userName, Arrays.asList(EmcSecurityConfig.IC)));
+    employee.setUserName(userName);
     return employee;
   }
 
   @Override
-  public Employee updateEmployeeName(Integer employeeId, String firstName, String lastName) {
-    Employee employee = getEmployeeById(employeeId);
+  @PreAuthorizeDirectReports
+  public Employee updateEmployeeName(Integer id, String firstName, String lastName) {
+    Employee employee = getEmployeeById(id);
     employee.setFirstName(firstName);
     employee.setLastName(lastName);
     return employee;
   }
 
-  private Employee getEmployeeById(Integer employeeId) {
+  public Employee getEmployeeById(Integer employeeId) {
     return employees.stream().filter(emp -> emp.getId().equals(employeeId)).findFirst().get();
   }
 
   @Override
+  public Employee getEmployeeByUserName(String username) {
+    log.info(Arrays.toString(employees.toArray()));
+    return employees.stream().filter(emp -> emp.getUserName().equals(username)).findFirst().get();
+  }
+
+  @Override
+  @PreAuthorizeDirectReports
   public Employee updateReporting(Integer employeeId, Integer newReportingTo) {
     Employee employee = getEmployeeById(employeeId);
     employee.setReportsTo(newReportingTo);

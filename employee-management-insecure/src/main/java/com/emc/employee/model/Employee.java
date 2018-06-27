@@ -17,6 +17,7 @@ public class Employee {
   private String firstName;
   private String lastName;
   private Integer id;
+  private String userName;
 
   public boolean equals(Object o) {
     if (o == this) {
