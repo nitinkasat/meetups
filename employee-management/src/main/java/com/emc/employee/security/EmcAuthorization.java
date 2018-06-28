@@ -2,13 +2,13 @@ package com.emc.employee.security;
 
 import com.emc.employee.config.EmcSecurityConfig;
 import com.emc.employee.model.Employee;
-import com.emc.employee.store.EmployeeService;
-import com.emc.employee.store.EmployeeServiceImpl;
+import com.emc.employee.service.EmployeeService;
+import java.util.Collection;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
@@ -29,9 +29,14 @@ public class EmcAuthorization {
     User user = (User) authentication.getPrincipal();
     String userName = user.getUsername();
     Employee loggedInUser = employeeService.getEmployeeByUserName(userName);
-    return loggedInUser.getId().equals(employee.getId()) || loggedInUser.getId()
-        .equals(employee.getReportsTo()) || authentication.getAuthorities()
-        .contains(EmcSecurityConfig.ADMIN);
+    if (loggedInUser != null) {
+      Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+      return loggedInUser.getId().equals(employee.getId()) || (loggedInUser.getId()
+          .equals(employee.getReportsTo()) && authorities
+          .contains(new SimpleGrantedAuthority(EmcSecurityConfig.MGR_ROLE)))
+          || authorities.contains(new SimpleGrantedAuthority(EmcSecurityConfig.ADMIN_ROLE));
+    }
+    return false;
   }
 
 }

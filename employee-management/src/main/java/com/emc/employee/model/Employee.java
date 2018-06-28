@@ -1,5 +1,9 @@
 package com.emc.employee.model;
 
+import com.emc.employee.config.EmcSecurityConfig;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +22,7 @@ public class Employee {
   private String lastName;
   private Integer id;
   private String userName;
+  private List<String> roles = new ArrayList<>();
 
   public boolean equals(Object o) {
     if (o == this) {

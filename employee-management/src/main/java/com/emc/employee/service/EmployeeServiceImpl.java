@@ -1,4 +1,4 @@
-package com.emc.employee.store;
+package com.emc.employee.service;
 
 import com.emc.employee.config.EmcSecurityConfig;
 import com.emc.employee.model.Employee;
@@ -6,17 +6,21 @@ import com.emc.employee.security.PostAuthorizeDirectReports;
 import com.emc.employee.security.PreAuthorizeDirectReports;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("employeeService")
 @Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -29,16 +33,10 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Autowired
   public EmployeeServiceImpl(EmcSecurityConfig emcSecurityConfig,
       BCryptPasswordEncoder encoder) {
-    employees.add(new Employee(null, "Danielle", "Kody", id.getAndIncrement(), "daniellek"));
-    int reportsToDanielle = id.get();
-    employees
-        .add(new Employee(reportsToDanielle, "John", "Anderson", id.getAndIncrement(), "johna"));
-    employees
-        .add(new Employee(reportsToDanielle, "Kelly", "Jackson", id.getAndIncrement(), "kellyj"));
-    employees.add(new Employee(null, "Tom", "Henson", id.getAndIncrement(), "tomh"));
     this.userDetailsManager = emcSecurityConfig.getUserDetailsManager();
     this.encoder = encoder;
   }
+
 
   @Override
   public List<Employee> getEmployees() {
@@ -48,14 +46,30 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   @PostAuthorizeDirectReports
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo) {
+    return addEmployee(firstName, lastName, reportsTo,
+        Collections.singletonList(EmcSecurityConfig.USER));
+  }
+
+  private void addUserToSecurityContext(String userName, List<String> roles) {
+    List authorities = roles.stream().map(role -> new SimpleGrantedAuthority(role))
+        .collect(Collectors.toList());
+    User user = new User(userName, encoder.encode(userName), authorities);
+    userDetailsManager.createUser(user);
+  }
+
+  @Override
+  public Employee addEmployee(String firstName, String lastName, Integer reportsTo,
+      List<String> roles) {
     String userName = firstName.toLowerCase().concat(("" + lastName.charAt(0)).toLowerCase());
+    if (!roles.contains(EmcSecurityConfig.USER)) {
+      roles.add(EmcSecurityConfig.USER);
+    }
     Employee employee = new Employee(reportsTo, firstName, lastName, id.getAndIncrement(),
-        userName);
+        userName, roles);
     if (userDetailsManager.userExists(userName)) {
       userName = userName + RANDOM.nextInt();
     }
-    User user = new User(userName, encoder.encode(userName), Arrays.asList(EmcSecurityConfig.IC));
-    userDetailsManager.createUser(user);
+    addUserToSecurityContext(userName, roles);
     employee.setUserName(userName);
     employees.add(employee);
     return employee;
@@ -77,7 +91,9 @@ public class EmployeeServiceImpl implements EmployeeService {
   @Override
   public Employee getEmployeeByUserName(String username) {
     log.info(Arrays.toString(employees.toArray()));
-    return employees.stream().filter(emp -> emp.getUserName().equals(username)).findFirst().get();
+    Optional<Employee> first = employees.stream().filter(emp -> emp.getUserName().equals(username))
+        .findFirst();
+    return first.isPresent() ? first.get() : null;
   }
 
   @Override

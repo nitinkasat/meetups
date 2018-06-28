@@ -1,8 +1,7 @@
 package com.emc.employee.controller;
 
 import com.emc.employee.model.Employee;
-import com.emc.employee.security.PreAuthorizeDirectReports;
-import com.emc.employee.store.EmployeeService;
+import com.emc.employee.service.EmployeeService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
