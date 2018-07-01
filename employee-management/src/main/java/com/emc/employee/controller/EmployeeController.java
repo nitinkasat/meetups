@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/employee")
+@RequestMapping
 @CrossOrigin(origins = "http://localhost:4200", maxAge = 3600,
     allowedHeaders = {"Access-Control-Allow-Origin", "x-auth-token", "x-requested-with",
         "x-xsrf-token"})
@@ -28,12 +28,12 @@ public class EmployeeController {
     this.employeeService = employeeStore;
   }
 
-  @GetMapping("/admin/all")
+  @GetMapping("/admin/all/employees")
   public @ResponseBody List<Employee> getAllEmployees() {
     return employeeService.getEmployees();
   }
 
-  @PostMapping
+  @PostMapping("/employee")
   @PreAuthorize(value = "hasAnyAuthority('Admin','Mgr')")
   public @ResponseBody
   Employee addEmployee(@RequestBody Employee employee) {
@@ -41,13 +41,13 @@ public class EmployeeController {
         .addEmployee(employee.getFirstName(), employee.getLastName(), employee.getReportsTo());
   }
 
-  @PutMapping("/name/{id}")
+  @PutMapping("/employee/name/{id}")
   public Employee updateEmployeeName(@PathVariable Integer id, @RequestParam String firstName,
       @RequestParam String lastName) {
     return employeeService.updateEmployeeName(id, firstName, lastName);
   }
 
-  @PutMapping("/reporting/{id}")
+  @PutMapping("/employee/reporting/{id}")
   public @ResponseBody
   Employee updateReporting(@PathVariable Integer id, @RequestParam Integer newReportingTo) {
     return employeeService.updateReporting(id, newReportingTo);

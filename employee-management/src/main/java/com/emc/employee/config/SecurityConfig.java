@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
         .httpBasic().and().authorizeRequests()
         .mvcMatchers("**/swagger*").permitAll()
-        .mvcMatchers("/employee/admin/**").hasAuthority(ADMIN_ROLE)
+        .antMatchers("/admin/all/employees").hasAuthority(ADMIN_ROLE)
         .mvcMatchers("/**/employee/**").authenticated();
   }
 
