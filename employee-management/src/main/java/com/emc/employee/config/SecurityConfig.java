@@ -7,30 +7,31 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
-@EnableWebSecurity
+@EnableWebSecurity(debug = true)
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class EmcSecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   public static final String ADMIN_ROLE = "Admin";
   public static final String MGR_ROLE = "Mgr";
   public static final String USER = "User";
   @Getter
-  private InMemoryUserDetailsManager userDetailsManager=new InMemoryUserDetailsManager();
+  private InMemoryUserDetailsManager userDetailsManager = new InMemoryUserDetailsManager();
 
-  public EmcSecurityConfig() {
+  public SecurityConfig() {
   }
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http
-        .httpBasic()
-        .and()
-        .authorizeRequests()
+        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+        .httpBasic().and().authorizeRequests()
+        .mvcMatchers("**/swagger*").permitAll()
         .mvcMatchers("/employee/admin/**").hasAuthority(ADMIN_ROLE)
-        .anyRequest().authenticated().and().csrf().disable();
+        .mvcMatchers("/**/employee/**").authenticated();
   }
 
   @Override

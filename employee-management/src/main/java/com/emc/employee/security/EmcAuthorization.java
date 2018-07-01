@@ -1,6 +1,6 @@
 package com.emc.employee.security;
 
-import com.emc.employee.config.EmcSecurityConfig;
+import com.emc.employee.config.SecurityConfig;
 import com.emc.employee.model.Employee;
 import com.emc.employee.service.EmployeeService;
 import java.util.Collection;
@@ -33,8 +33,8 @@ public class EmcAuthorization {
       Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
       return loggedInUser.getId().equals(employee.getId()) || (loggedInUser.getId()
           .equals(employee.getReportsTo()) && authorities
-          .contains(new SimpleGrantedAuthority(EmcSecurityConfig.MGR_ROLE)))
-          || authorities.contains(new SimpleGrantedAuthority(EmcSecurityConfig.ADMIN_ROLE));
+          .contains(new SimpleGrantedAuthority(SecurityConfig.MGR_ROLE)))
+          || authorities.contains(new SimpleGrantedAuthority(SecurityConfig.ADMIN_ROLE));
     }
     return false;
   }

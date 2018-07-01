@@ -1,8 +1,6 @@
 package com.emc.employee.model;
 
-import com.emc.employee.config.EmcSecurityConfig;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.emc.employee.service;
 
-import com.emc.employee.config.EmcSecurityConfig;
+import com.emc.employee.config.SecurityConfig;
 import com.emc.employee.model.Employee;
 import com.emc.employee.security.PostAuthorizeDirectReports;
 import com.emc.employee.security.PreAuthorizeDirectReports;
@@ -31,9 +31,9 @@ public class EmployeeServiceImpl implements EmployeeService {
   private AtomicInteger id = new AtomicInteger(1);
 
   @Autowired
-  public EmployeeServiceImpl(EmcSecurityConfig emcSecurityConfig,
+  public EmployeeServiceImpl(SecurityConfig securityConfig,
       BCryptPasswordEncoder encoder) {
-    this.userDetailsManager = emcSecurityConfig.getUserDetailsManager();
+    this.userDetailsManager = securityConfig.getUserDetailsManager();
     this.encoder = encoder;
   }
 
@@ -47,7 +47,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @PostAuthorizeDirectReports
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo) {
     return addEmployee(firstName, lastName, reportsTo,
-        Collections.singletonList(EmcSecurityConfig.USER));
+        Collections.singletonList(SecurityConfig.USER));
   }
 
   private void addUserToSecurityContext(String userName, List<String> roles) {
@@ -61,8 +61,8 @@ public class EmployeeServiceImpl implements EmployeeService {
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo,
       List<String> roles) {
     String userName = firstName.toLowerCase().concat(("" + lastName.charAt(0)).toLowerCase());
-    if (!roles.contains(EmcSecurityConfig.USER)) {
-      roles.add(EmcSecurityConfig.USER);
+    if (!roles.contains(SecurityConfig.USER)) {
+      roles.add(SecurityConfig.USER);
     }
     Employee employee = new Employee(reportsTo, firstName, lastName, id.getAndIncrement(),
         userName, roles);

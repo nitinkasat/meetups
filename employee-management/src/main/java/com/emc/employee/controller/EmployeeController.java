@@ -29,8 +29,7 @@ public class EmployeeController {
   }
 
   @GetMapping("/admin/all")
-  public @ResponseBody
-  List<Employee> getAllEmployees() {
+  public @ResponseBody List<Employee> getAllEmployees() {
     return employeeService.getEmployees();
   }
 
