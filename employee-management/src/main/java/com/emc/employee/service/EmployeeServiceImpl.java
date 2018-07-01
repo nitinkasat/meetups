@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -44,7 +45,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   }
 
   @Override
-  @PostAuthorizeDirectReports
+  @PreAuthorize("@emcAuthorization.checkReportingTo(authentication,#reportsTo)")
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo) {
     return addEmployee(firstName, lastName, reportsTo,
         Collections.singletonList(SecurityConfig.USER));

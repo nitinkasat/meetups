@@ -22,7 +22,7 @@ public class EmployeeServiceImplTest {
   }
 
   @Test
-  @WithMockUser(username = "daniellek", authorities = {"Admin"})
+  @WithMockUser(username = "admina", authorities = {"Admin"})
   public void addEmployeeWithAdminUser() {
     employeeService.addEmployee("nitin", "kasat", 3);
   }

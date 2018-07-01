@@ -1,6 +1,7 @@
 package com.emc.employee.controller;
 
 import com.emc.employee.model.Employee;
+import com.emc.employee.security.PostAuthorizeDirectReports;
 import com.emc.employee.service.EmployeeService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,6 +32,12 @@ public class EmployeeController {
   @GetMapping("/admin/all/employees")
   public @ResponseBody List<Employee> getAllEmployees() {
     return employeeService.getEmployees();
+  }
+
+  @GetMapping("/employee/{id}")
+  @PostAuthorizeDirectReports
+  public @ResponseBody Employee getAllEmployee(Integer employeeId) {
+    return employeeService.getEmployeeById(employeeId);
   }
 
   @PostMapping("/employee")

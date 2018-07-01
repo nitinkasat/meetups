@@ -4,6 +4,8 @@ import com.emc.employee.config.SecurityConfig;
 import com.emc.employee.model.Employee;
 import com.emc.employee.service.EmployeeService;
 import java.util.Collection;
+import java.util.Objects;
+import javax.sql.RowSet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -37,6 +39,17 @@ public class EmcAuthorization {
           || authorities.contains(new SimpleGrantedAuthority(SecurityConfig.ADMIN_ROLE));
     }
     return false;
+  }
+
+  public boolean checkReportingTo(Authentication authentication, Integer directReportingTo) {
+    User loggedInUser = (User) authentication.getPrincipal();
+    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+    boolean isAdmin = authorities.contains(new SimpleGrantedAuthority(SecurityConfig.ADMIN_ROLE));
+    Employee loggedInEmployee = employeeService.getEmployeeByUserName(loggedInUser.getUsername());
+    if (!isAdmin && Objects.nonNull(loggedInEmployee)) {
+      return loggedInEmployee.getId().equals(directReportingTo);
+    }
+    return isAdmin;
   }
 
 }
