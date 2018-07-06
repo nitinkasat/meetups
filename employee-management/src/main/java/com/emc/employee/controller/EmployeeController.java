@@ -36,8 +36,8 @@ public class EmployeeController {
 
   @GetMapping("/employee/{id}")
   @PostAuthorizeDirectReports
-  public @ResponseBody Employee getAllEmployee(Integer employeeId) {
-    return employeeService.getEmployeeById(employeeId);
+  public @ResponseBody Employee getAllEmployee(@PathVariable Integer id) {
+    return employeeService.getEmployeeById(id);
   }
 
   @PostMapping("/employee")
