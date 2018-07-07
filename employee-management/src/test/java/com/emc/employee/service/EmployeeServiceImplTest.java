@@ -34,7 +34,7 @@ public class EmployeeServiceImplTest {
   }
 
   @Test
-  @WithMockUser(username = "kellyj", authorities = {"User"})
+  @WithMockUser(username = "kellyj", authorities = {"Employee"})
   public void updateNameWithEmployeeSelfLogin() {
     employeeService.updateEmployeeName(3, "Kelly", "Henson");
   }

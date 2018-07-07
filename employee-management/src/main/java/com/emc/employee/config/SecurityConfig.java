@@ -18,7 +18,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   public static final String ADMIN_ROLE = "Admin";
   public static final String MGR_ROLE = "Mgr";
-  public static final String USER = "User";
+  public static final String EMPLOYEE = "Employee";
   @Getter
   private InMemoryUserDetailsManager userDetailsManager = new InMemoryUserDetailsManager();
 
@@ -31,7 +31,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
         .httpBasic().and().authorizeRequests()
         .mvcMatchers("**/swagger*").permitAll()
-        .antMatchers("/admin/all/employees").hasAuthority(ADMIN_ROLE)
+        .mvcMatchers("/admin/all/employees").hasAuthority(ADMIN_ROLE)
         .mvcMatchers("/**/employee/**").authenticated();
   }
 
@@ -42,6 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Bean
   public BCryptPasswordEncoder getPasswordEncoder() {
+
     return new BCryptPasswordEncoder();
   }
 }

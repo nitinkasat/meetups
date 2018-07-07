@@ -2,7 +2,6 @@ package com.emc.employee.service;
 
 import com.emc.employee.config.SecurityConfig;
 import com.emc.employee.model.Employee;
-import com.emc.employee.security.PostAuthorizeDirectReports;
 import com.emc.employee.security.PreAuthorizeDirectReports;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,7 +47,7 @@ public class EmployeeServiceImpl implements EmployeeService {
   @PreAuthorize("@emcAuthorization.checkReportingTo(authentication,#reportsTo)")
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo) {
     return addEmployee(firstName, lastName, reportsTo,
-        Collections.singletonList(SecurityConfig.USER));
+        Collections.singletonList(SecurityConfig.EMPLOYEE));
   }
 
   private void addUserToSecurityContext(String userName, List<String> roles) {
@@ -62,8 +61,8 @@ public class EmployeeServiceImpl implements EmployeeService {
   public Employee addEmployee(String firstName, String lastName, Integer reportsTo,
       List<String> roles) {
     String userName = firstName.toLowerCase().concat(("" + lastName.charAt(0)).toLowerCase());
-    if (!roles.contains(SecurityConfig.USER)) {
-      roles.add(SecurityConfig.USER);
+    if (!roles.contains(SecurityConfig.EMPLOYEE)) {
+      roles.add(SecurityConfig.EMPLOYEE);
     }
     Employee employee = new Employee(reportsTo, firstName, lastName, id.getAndIncrement(),
         userName, roles);
